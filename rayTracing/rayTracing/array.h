@@ -15,21 +15,21 @@ struct IsPOD
 	{
 		new ( pointer ) T( *oldData );
 	}
-	static void Create( T* pointer, T const* oldData, UINT const num )
+	static void Create( T* pointer, T const* oldData, unsigned int const num )
 	{
-		for ( UINT i = 0; i < num; ++i )
+		for ( unsigned int i = 0; i < num; ++i )
 		{
 			new ( &pointer[i] ) T( oldData[i] );
 		}
 	}
-	static void Create( T* pointer, UINT const num )
+	static void Create( T* pointer, unsigned int const num )
 	{
-		for ( UINT i = 0; i < num; ++i )
+		for ( unsigned int i = 0; i < num; ++i )
 		{
 			new ( &pointer[i] ) T();
 		}
 	}
-	static void Create( T* pointer, UINT start, UINT const num )
+	static void Create( T* pointer, unsigned int start, unsigned int const num )
 	{
 		for ( ; start < num; ++start )
 		{
@@ -41,14 +41,14 @@ struct IsPOD
 		pointer->~T();
 	}
 
-	static void Destroy(T* pointer, UINT const num )
+	static void Destroy(T* pointer, unsigned int const num )
 	{
-		for ( UINT i = 0; i < num; ++i )
+		for ( unsigned int i = 0; i < num; ++i )
 		{
 			pointer[i].~T();
 		}
 	}
-	static void Destroy(T* pointer, UINT start, UINT const num)
+	static void Destroy(T* pointer, unsigned int start, unsigned int const num)
 	{
 		for ( ; start < num; ++start )
 		{
@@ -70,23 +70,23 @@ struct IsPOD<T*>
 	{
 		memcpy( pointer, oldData, sizeof( T* ) );
 	}
-	static void Create( T** pointer, T* const* oldData, UINT const num )
+	static void Create( T** pointer, T* const* oldData, unsigned int const num )
 	{
 		memcpy( pointer, oldData, num * sizeof( T* ) );
 	}
-	static void Create( T** pointer, UINT start, UINT const num )
+	static void Create( T** pointer, unsigned int start, unsigned int const num )
 	{
 	}
-	static void Create( T** pointer, UINT const num )
+	static void Create( T** pointer, unsigned int const num )
 	{
 	}
 	static void Destroy(T** pointer)
 	{
 	}
-	static void Destroy(T** pointer, UINT const num )
+	static void Destroy(T** pointer, unsigned int const num )
 	{
 	}
-	static void Destroy(T** pointer, UINT start, UINT const num)
+	static void Destroy(T** pointer, unsigned int start, unsigned int const num)
 	{
 	}
 };
@@ -100,15 +100,15 @@ static void Create( T* pointer, T const* oldData )						\
 {																		\
 	memcpy( pointer, oldData, sizeof( T ) );							\
 }																		\
-static void Create( T* pointer, T const* oldData, UINT const num )		\
+static void Create( T* pointer, T const* oldData, unsigned int const num )		\
 {																		\
 	memcpy( pointer, oldData, num * sizeof( T ) );						\
 }																		\
-static void Create( T* pointer, UINT const num ){}						\
-static void Create( T* pointer, UINT start, UINT const num ){}			\
+static void Create( T* pointer, unsigned int const num ){}						\
+static void Create( T* pointer, unsigned int start, unsigned int const num ){}			\
 static void Destroy(T* pointer){}										\
-static void Destroy(T* pointer, UINT const num ){}						\
-static void Destroy(T* pointer, UINT start, UINT const num){}			\
+static void Destroy(T* pointer, unsigned int const num ){}						\
+static void Destroy(T* pointer, unsigned int start, unsigned int const num){}			\
 };																		\
 
 template <typename T >
@@ -116,11 +116,11 @@ class TArray
 {
 private:
 	T* m_data;
-	UINT m_size;
-	UINT m_allocSize;
+	unsigned int m_size;
+	unsigned int m_allocSize;
 
 private:
-	void Reallocate( UINT const size )
+	void Reallocate( unsigned int const size )
 	{
 		if ( size != m_allocSize )
 		{
@@ -130,7 +130,7 @@ private:
 			if ( 0 < size )
 			{
 				m_data = (T*)malloc( size * sizeof( T ) );
-				UINT const copySize = size < m_size ? size : m_size;
+				unsigned int const copySize = size < m_size ? size : m_size;
 				IsPOD< T >::Create( m_data, oldData, copySize );
 			}
 
@@ -149,7 +149,7 @@ public:
 		, m_size( 0 )
 	{}
 
-	TArray( UINT const allocSize )
+	TArray( unsigned int const allocSize )
 		: m_data( nullptr )
 		, m_allocSize( 0 )
 		, m_size( 0 )
@@ -172,7 +172,7 @@ public:
 		free( m_data );
 	}
 
-	void Resize( UINT const size )
+	void Resize( unsigned int const size )
 	{
 		if ( m_size < size )
 		{
@@ -190,7 +190,7 @@ public:
 		m_size = size;
 	}
 
-	void Reserve( UINT const size )
+	void Reserve( unsigned int const size )
 	{
 		if ( m_allocSize < size )
 		{
@@ -222,14 +222,12 @@ public:
 	}
 	void EraseBack()
 	{
-		ASSERT( 0 < m_size );
 		IsPOD< T >::Destroy( &m_data[ m_size - 1 ] );
 		--m_size;
 	}
 
 	T PopBack()
 	{
-		ASSERT( 0 < m_size );
 		T returnVal;
 
 		IsPOD<T>::Create( &returnVal, &m_data[ m_size - 1 ] );
@@ -275,29 +273,25 @@ public:
 		return m_data;
 	}
 
-	__forceinline T& GetAt( UINT i )
+	__forceinline T& GetAt( unsigned int i )
 	{
-		ASSERT( i < m_size );
 		return m_data[ i ];
 	}
-	__forceinline T const& GetAt( UINT i ) const
+	__forceinline T const& GetAt( unsigned int i ) const
 	{
-		ASSERT( i < m_size );
-		return m_data[ i ];
-	}
-
-	__forceinline T& operator[]( UINT i )
-	{
-		ASSERT( i < m_size );
-		return m_data[ i ];
-	}
-	__forceinline T const& operator[]( UINT i ) const
-	{
-		ASSERT( i < m_size );
 		return m_data[ i ];
 	}
 
-	__forceinline UINT Size() const
+	__forceinline T& operator[]( unsigned int i )
+	{
+		return m_data[ i ];
+	}
+	__forceinline T const& operator[]( unsigned int i ) const
+	{
+		return m_data[ i ];
+	}
+
+	__forceinline unsigned int Size() const
 	{
 		return m_size;
 	}

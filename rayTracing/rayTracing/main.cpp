@@ -1,5 +1,9 @@
+#include <stdlib.h>     
+#include <time.h>       
+
 #include "headers.h"
 
+//#define DUMMY_PROFILER
 #ifdef DUMMY_PROFILER
 #include <stdio.h>
 long constexpr GFrameProfNum = 2000;
@@ -13,6 +17,8 @@ CTimer GTimer;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, INT nCmdShow)
 {
+	srand (time(NULL));
+
 	unsigned int winWidth = 600u;
 	unsigned int winHeight = 600u;
 
@@ -59,6 +65,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	GInputManager.Init();
 	GInputManager.AddObserver(&GSystemInput);
 
+	CHitTableList hitTableList;
+	hitTableList.AddHitTable( new CSphere( Vec3( 0.f, 0.f, -1.f ), 0.5f, new CLambertianMat( Vec3(0.8f, 0.3f, 0.3f ) ) ) );
+	hitTableList.AddHitTable( new CSphere( Vec3( 0.f, -100.5f, -1.f ), 100.f, new CLambertianMat( Vec3( 0.8f, 0.8f, 0.0f ) ) ) );
+	hitTableList.AddHitTable( new CSphere( Vec3( 1.f, 0.f, -1.f ), 0.5f, new CMetalMat( Vec3( 0.8f, 0.6f, 0.2f ), 0.3f ) ) );
+	hitTableList.AddHitTable( new CSphere( Vec3( -1.f, 0.f, -1.f ), 0.5f, new CDielectricMat( 1.5f ) ) );
+
+	Vec3 const lookFrom( 3.f, 3.f, 2.f );
+	Vec3 const lookAt( 0.f, 0.f, -1.f );
+	float const distanceToFocus = ( lookFrom - lookAt ).Magnitude();
+	float const aperture = 2.f;
+
+	CCamera camera( lookFrom, lookAt, Vec3(0.f, 1.f, 0.f), winWidth, winHeight, 20.f, aperture, distanceToFocus );
+
 	MSG msg = { 0 };
 	bool run = true;
 	float const axis[] = { 1.f, 0.f, 0.f };
@@ -80,7 +99,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		++GFrameProfID;
 #endif
 
-		GRender.Draw();
+		GRender.Draw( camera, hitTableList );
 	}
 
 #ifdef DUMMY_PROFILER
@@ -99,6 +118,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	OutputDebugStringA( log );
 #endif
 
+	hitTableList.Clear();
 	GRender.Release();
 	return 0;
 }

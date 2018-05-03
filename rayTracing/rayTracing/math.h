@@ -103,6 +103,20 @@ struct Vec3
 		, z(_z)
 	{}
 
+	Vec3 operator* (float const f) const
+	{
+		return Vec3(x * f, y * f, z * f);
+	}
+	Vec3 operator/ (float const f) const
+	{
+		return Vec3(x / f, y / f, z / f);
+	}
+
+	Vec3 operator* (Vec3 const v) const
+	{
+		return Vec3(x * v.x, y * v.y, z * v.z);
+	}
+
 	Vec3 operator-(Vec3 const& v1) const
 	{
 		return Vec3(x - v1.x, y - v1.y, z - v1.z);
@@ -111,6 +125,29 @@ struct Vec3
 	{
 		return Vec3(x + v1.x, y + v1.y, z + v1.z);
 	}
+
+	Vec3 operator+( float const& f ) const
+	{
+		return Vec3(x + f, y + f, z + f);
+	}
+
+	Vec3 operator-( float const& f ) const
+	{
+		return Vec3(x - f, y - f, z - f);
+	}
+
+	Vec3 operator-() const
+	{
+		return Vec3( -x, -y, -z );
+	}
+
+	void operator+=(Vec3 const v)
+	{
+		x += v.x;
+		y += v.y;
+		z += v.z;
+	}
+
 	void operator/=(float const f)
 	{
 		x /= f;
@@ -118,11 +155,56 @@ struct Vec3
 		z /= f;
 	}
 
+	void operator*=(float const f)
+	{
+		x *= f;
+		y *= f;
+		z *= f;
+	}
+
 	void Set( float const _x, float const _y, float const _z )
 	{
 		x = _x;
 		y = _y;
 		z = _z;
+	}
+
+	float Magnitude() const
+	{
+		return sqrtf( x * x + y * y + z * z );
+	}
+
+	float MagnitudeSq() const
+	{
+		return x * x + y * y + z * z;
+	}
+
+	Vec3 GetNormalized() const
+	{
+		float const magnitude = Magnitude();
+		if ( 0.f < magnitude )
+		{
+			return *this / magnitude;
+		}
+		else
+		{
+			return Vec3( 0.f, 0.f, 0.f );
+		}
+	}
+
+	static __forceinline float Dot(Vec3 const& v0, Vec3 const& v1)
+	{
+		return v0.x * v1.x + v0.y * v1.y + v0.z * v1.z;
+	}
+
+	static __forceinline Vec3 Cross(Vec3 const& v0, Vec3 const& v1)
+	{
+		return Vec3
+		(
+			v0.y * v1.z - v0.z * v1.y,
+			v0.z * v1.x - v0.x * v1.z,
+			v0.x * v1.y - v0.y * v1.x
+		);
 	}
 };
 
@@ -421,3 +503,13 @@ struct Quaternion
 		return Quaternion(axis[0] * sinA, axis[1] * sinA, axis[2] * sinA, cosf(halfAngle));
 	}
 };
+
+namespace Math
+{
+	Vec3 RandomInUnitSphere();
+	Vec3 RandomInUnitDisk();
+	Vec3 Reflect( Vec3 const v, Vec3 const n );
+	bool Refract( Vec3 const v, Vec3 const n, float niOverNt, Vec3& outRefracted );
+	float Schlick( float const cosine, float const refIdx );
+	float Rand();
+}

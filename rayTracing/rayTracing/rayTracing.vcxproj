@@ -111,15 +111,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="hitTable.cpp" />
+    <ClCompile Include="hitTableList.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="math.cpp" />
     <ClCompile Include="render.cpp" />
+    <ClCompile Include="sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="array.h" />
+    <ClInclude Include="camera.h" />
     <ClInclude Include="headers.h" />
+    <ClInclude Include="hitTable.h" />
+    <ClInclude Include="hitTableList.h" />
     <ClInclude Include="input.h" />
+    <ClInclude Include="material.h" />
     <ClInclude Include="math.h" />
+    <ClInclude Include="ray.h" />
     <ClInclude Include="render.h" />
+    <ClInclude Include="sphere.h" />
     <ClInclude Include="timer.h" />
     <ClInclude Include="types.h" />
   </ItemGroup>

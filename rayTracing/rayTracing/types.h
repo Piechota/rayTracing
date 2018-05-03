@@ -24,6 +24,15 @@ struct SPixel
 
 		return { r | g | b | a };
 	}
+
+	static SPixel ToPixel( Vec3 const color )
+	{
+		uint32_t const r = uint32_t( color.x * 255.f ) << 16;
+		uint32_t const g = uint32_t( color.y * 255.f ) << 8;
+		uint32_t const b = uint32_t( color.z * 255.f );
+
+		return { r | g | b | 0xFF000000 };
+	}
 };
 
 template<class Key, class Value>

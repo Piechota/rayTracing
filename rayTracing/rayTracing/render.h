@@ -1,4 +1,10 @@
 #pragma once
+#include "ray.h"
+#include "camera.h"
+#include "hitTable.h"
+#include "sphere.h"
+#include "hitTableList.h"
+#include "material.h"
 
 class CRender
 {
@@ -16,7 +22,7 @@ public:
 	void Init(unsigned int winWidth, unsigned int winHeight);
 	void SetHWnd( HWND hwnd ) { m_hwnd = hwnd; }
 
-	void Draw();
+	void Draw( CCamera const& camera, CHitTableList const& hitTableList );
 	void Release();
 };
 extern CRender GRender;
