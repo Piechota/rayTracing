@@ -3,6 +3,7 @@
 
 #include "headers.h"
 
+#define USE_BVH
 //#define DUMMY_PROFILER
 #ifdef DUMMY_PROFILER
 #include <stdio.h>
@@ -14,6 +15,74 @@ long GFrameProfID = 0;
 CInputManager GInputManager;
 CSystemInput GSystemInput;
 CTimer GTimer;
+
+void GetRandomScene( CHitTableList& outHitTable )
+{
+	outHitTable.AddHitTable( new CSphere( Vec3( 0.f, -1000.f, 0.f ), 1000.f, new CLambertianMat( Vec3( 0.7f, 0.7f, 0.7f ) ) ) );
+	for ( int a = -10; a < 10; ++a )
+	{
+		for ( int b = -10; b < 10; ++b )
+		{
+			float const matRand = Math::Rand();
+			Vec3 const center( a + 0.9f * Math::Rand(), 0.2f, b + 0.9f * Math::Rand() );
+			if ( 0.9f < ( center - Vec3( 4.f, 0.2f, 0.f ) ).Magnitude() )
+			{
+				if ( matRand < 0.8f )
+				{
+					outHitTable.AddHitTable( new CMovingSphere( center, center + Vec3( 0.f, 0.5f * Math::Rand(), 0.f ), 0.f, 1.f, 0.2f, new CLambertianMat( Vec3( Math::Rand()*Math::Rand(), Math::Rand()*Math::Rand(), Math::Rand()*Math::Rand() ) ) ) );
+				}
+				else if ( matRand < 0.95f )
+				{
+					outHitTable.AddHitTable( new CSphere( center, 0.2f, new CMetalMat( Vec3( 0.5f * ( 1.f + Math::Rand() ), 0.5f * ( 1.f + Math::Rand() ), 0.5f * ( 1.f + Math::Rand() ) ), 0.5f * Math::Rand() ) ) );
+				}
+				else
+				{
+					outHitTable.AddHitTable( new CSphere( center, 0.2f, new CDielectricMat( 1.5f ) ) );
+				}
+			}
+		}
+	}
+
+	outHitTable.AddHitTable( new CSphere( Vec3( 0.f, 1.f, 0.f ), 1.f, new CDielectricMat( 1.5f ) ) );
+	outHitTable.AddHitTable( new CSphere( Vec3( -4.f, 1.f, 0.f ), 1.f, new CLambertianMat( Vec3( 0.4f, 0.2f, 0.1f ) ) ) );
+	outHitTable.AddHitTable( new CSphere( Vec3( 4.f, 1.f, 0.f ), 1.f, new CMetalMat( Vec3( 0.7f, 0.6f, 0.5f), 0.f ) ) );
+}
+
+void GetRandomScene( CBVHNode*& outBVHNode )
+{
+	TArray< IHitTable* > objects;
+
+	objects.Add( new CSphere( Vec3( 0.f, -1000.f, 0.f ), 1000.f, new CLambertianMat( Vec3( 0.7f, 0.7f, 0.7f ) ) ) );
+	for ( int a = -10; a < 10; ++a )
+	{
+		for ( int b = -10; b < 10; ++b )
+		{
+			float const matRand = Math::Rand();
+			Vec3 const center( a + 0.9f * Math::Rand(), 0.2f, b + 0.9f * Math::Rand() );
+			if ( 0.9f < ( center - Vec3( 4.f, 0.2f, 0.f ) ).Magnitude() )
+			{
+				if ( matRand < 0.8f )
+				{
+					objects.Add( new CMovingSphere( center, center + Vec3( 0.f, 0.5f * Math::Rand(), 0.f ), 0.f, 1.f, 0.2f, new CLambertianMat( Vec3( Math::Rand()*Math::Rand(), Math::Rand()*Math::Rand(), Math::Rand()*Math::Rand() ) ) ) );
+				}
+				else if ( matRand < 0.95f )
+				{
+					objects.Add( new CSphere( center, 0.2f, new CMetalMat( Vec3( 0.5f * ( 1.f + Math::Rand() ), 0.5f * ( 1.f + Math::Rand() ), 0.5f * ( 1.f + Math::Rand() ) ), 0.5f * Math::Rand() ) ) );
+				}
+				else
+				{
+					objects.Add( new CSphere( center, 0.2f, new CDielectricMat( 1.5f ) ) );
+				}
+			}
+		}
+	}
+
+	objects.Add( new CSphere( Vec3( 0.f, 1.f, 0.f ), 1.f, new CDielectricMat( 1.5f ) ) );
+	objects.Add( new CSphere( Vec3( -4.f, 1.f, 0.f ), 1.f, new CLambertianMat( Vec3( 0.4f, 0.2f, 0.1f ) ) ) );
+	objects.Add( new CSphere( Vec3( 4.f, 1.f, 0.f ), 1.f, new CMetalMat( Vec3( 0.7f, 0.6f, 0.5f), 0.f ) ) );
+
+	outBVHNode = new CBVHNode( objects.Data(), int( objects.Size() ), 0.f, 1.f );
+}
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, INT nCmdShow)
 {
@@ -65,18 +134,26 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	GInputManager.Init();
 	GInputManager.AddObserver(&GSystemInput);
 
+#ifdef USE_BVH
+	CBVHNode* sceneBVH = nullptr;
+	GetRandomScene( sceneBVH );
+#else 
 	CHitTableList hitTableList;
-	hitTableList.AddHitTable( new CSphere( Vec3( 0.f, 0.f, -1.f ), 0.5f, new CLambertianMat( Vec3(0.8f, 0.3f, 0.3f ) ) ) );
-	hitTableList.AddHitTable( new CSphere( Vec3( 0.f, -100.5f, -1.f ), 100.f, new CLambertianMat( Vec3( 0.8f, 0.8f, 0.0f ) ) ) );
-	hitTableList.AddHitTable( new CSphere( Vec3( 1.f, 0.f, -1.f ), 0.5f, new CMetalMat( Vec3( 0.8f, 0.6f, 0.2f ), 0.3f ) ) );
-	hitTableList.AddHitTable( new CSphere( Vec3( -1.f, 0.f, -1.f ), 0.5f, new CDielectricMat( 1.5f ) ) );
+	GetRandomScene( hitTableList );
+#endif
 
-	Vec3 const lookFrom( 3.f, 3.f, 2.f );
-	Vec3 const lookAt( 0.f, 0.f, -1.f );
+	Vec3 const lookFrom( 13.f, 2.f, 3.f );
+	Vec3 const lookAt( 0.f, 0.f, 0.f );
 	float const distanceToFocus = ( lookFrom - lookAt ).Magnitude();
-	float const aperture = 2.f;
+	float const aperture = 0.f;
 
-	CCamera camera( lookFrom, lookAt, Vec3(0.f, 1.f, 0.f), winWidth, winHeight, 20.f, aperture, distanceToFocus );
+	CCamera camera( lookFrom, lookAt, Vec3(0.f, 1.f, 0.f), winWidth, winHeight, 90.f, aperture, distanceToFocus, 0.f, 1.f );
+
+#ifdef USE_BVH
+	GRender.Draw( camera, sceneBVH );
+#else
+	GRender.Draw( camera, hitTableList );
+#endif
 
 	MSG msg = { 0 };
 	bool run = true;
@@ -98,8 +175,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 		GFramesProf[ GFrameProfID % GFrameProfNum] = GTimer.LastDelta();
 		++GFrameProfID;
 #endif
-
-		GRender.Draw( camera, hitTableList );
 	}
 
 #ifdef DUMMY_PROFILER
@@ -118,7 +193,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	OutputDebugStringA( log );
 #endif
 
+#ifdef USE_BVH
+	delete sceneBVH;
+#else
 	hitTableList.Clear();
+#endif
 	GRender.Release();
 	return 0;
 }

@@ -19,7 +19,7 @@ public:
 	virtual bool Scatter( CRay const& ray, SHitInfo const& hitInfo, Vec3& outAttenuation, CRay& outRayScattered ) const override
 	{
 		Vec3 const target = hitInfo.m_position + hitInfo.m_normal + Math::RandomInUnitSphere();
-		outRayScattered = CRay( hitInfo.m_position, target - hitInfo.m_position );
+		outRayScattered = CRay( hitInfo.m_position, target - hitInfo.m_position, ray.GetTime() );
 		outAttenuation = m_albedo;
 		return true;
 	}
@@ -41,7 +41,7 @@ public:
 	virtual bool Scatter( CRay const& ray, SHitInfo const& hitInfo, Vec3& outAttenuation, CRay& outRayScattered ) const override
 	{
 		Vec3 const reflected = Math::Reflect( ray.GetDirection().GetNormalized(), hitInfo.m_normal );
-		outRayScattered = CRay( hitInfo.m_position, reflected + Math::RandomInUnitSphere() * m_fuzz );
+		outRayScattered = CRay( hitInfo.m_position, reflected + Math::RandomInUnitSphere() * m_fuzz, ray.GetTime() );
 		outAttenuation = m_albedo;
 
 		return 0.f < Vec3::Dot( outRayScattered.GetDirection(), hitInfo.m_normal );
@@ -92,11 +92,11 @@ public:
 
 		if ( Math::Rand() < reflectProb )
 		{
-			outRayScattered = CRay( hitInfo.m_position, reflected );
+			outRayScattered = CRay( hitInfo.m_position, reflected, ray.GetTime() );
 		}
 		else
 		{
-			outRayScattered = CRay( hitInfo.m_position, refracted );
+			outRayScattered = CRay( hitInfo.m_position, refracted, ray.GetTime() );
 		}
 
 		return true;

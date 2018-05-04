@@ -1,4 +1,5 @@
 #pragma once
+#include "aabb.h"
 
 class IMaterial;
 
@@ -23,4 +24,5 @@ public:
 	virtual ~IHitTable();
 
 	virtual bool Hit( CRay const& ray, float const tMin, float const tMax, SHitInfo& outInfo ) const = 0;
+	virtual bool BoundingBox( float const t0, float const t1, CAABB& box ) const = 0;
 };

@@ -33,3 +33,36 @@ bool CHitTableList::Hit( CRay const & ray, float const tMin, float const tMax, S
 	outInfo = tmpHitInfo;
 	return hitAnything;
 }
+
+bool CHitTableList::BoundingBox( float const t0, float const t1, CAABB & box ) const
+{
+	unsigned int const listSize = m_list.Size();
+	if ( listSize == 0 )
+	{
+		return false;
+	}
+
+	CAABB tmpBox;
+	if ( !m_list[ 0 ]->BoundingBox( t0, t1, tmpBox ) )
+	{
+		return false;
+	}
+	else
+	{
+		box = tmpBox;
+	}
+
+	for ( unsigned int i = 1; i < listSize; ++i )
+	{
+		if ( m_list[ i ]->BoundingBox( t0, t1, tmpBox ) )
+		{
+			box.Combine( box, tmpBox );
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	return true;
+}

@@ -46,3 +46,9 @@ rayTracing/\.vs/rayTracing/v15/
 rayTracing/rayTracing/Debug/
 
 rayTracing/rayTracing/x64/Debug/
+
+rayTracing/rayTracing/x64/Release/
+
+*.iobj
+
+*.ipdb

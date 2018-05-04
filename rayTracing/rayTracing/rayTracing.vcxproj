@@ -111,15 +111,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bvhNode.cpp" />
     <ClCompile Include="hitTable.cpp" />
     <ClCompile Include="hitTableList.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math.cpp" />
+    <ClCompile Include="movingSphere.cpp" />
     <ClCompile Include="render.cpp" />
     <ClCompile Include="sphere.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="aabb.h" />
     <ClInclude Include="array.h" />
+    <ClInclude Include="bvhNode.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="headers.h" />
     <ClInclude Include="hitTable.h" />
@@ -127,6 +131,7 @@
     <ClInclude Include="input.h" />
     <ClInclude Include="material.h" />
     <ClInclude Include="math.h" />
+    <ClInclude Include="movingSphere.h" />
     <ClInclude Include="ray.h" />
     <ClInclude Include="render.h" />
     <ClInclude Include="sphere.h" />

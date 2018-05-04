@@ -3,7 +3,9 @@
 #include "camera.h"
 #include "hitTable.h"
 #include "sphere.h"
+#include "movingSphere.h"
 #include "hitTableList.h"
+#include "bvhNode.h"
 #include "material.h"
 
 class CRender
@@ -23,6 +25,7 @@ public:
 	void SetHWnd( HWND hwnd ) { m_hwnd = hwnd; }
 
 	void Draw( CCamera const& camera, CHitTableList const& hitTableList );
+	void Draw( CCamera const& camera, CBVHNode const* const pSceneBVH );
 	void Release();
 };
 extern CRender GRender;
