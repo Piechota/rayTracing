@@ -311,3 +311,15 @@ public:
 		IsPOD< T >::Create( m_data, other.m_data, m_size );
 	}
 };
+
+POD_TYPE(bool)
+POD_TYPE(unsigned short)
+POD_TYPE(unsigned int)
+POD_TYPE(short)
+POD_TYPE(int)
+POD_TYPE(__int64)
+POD_TYPE(unsigned char)
+POD_TYPE(char)
+POD_TYPE(float)
+POD_TYPE(double)
+POD_TYPE(Vec3)

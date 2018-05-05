@@ -1,5 +1,6 @@
 #pragma once
 #include <math.h>
+#include <float.h>
 
 namespace MathConsts
 {
@@ -512,4 +513,5 @@ namespace Math
 	bool Refract( Vec3 const v, Vec3 const n, float niOverNt, Vec3& outRefracted );
 	float Schlick( float const cosine, float const refIdx );
 	float Rand();
+	Vec2 GetSphereUV( Vec3 const p );
 }

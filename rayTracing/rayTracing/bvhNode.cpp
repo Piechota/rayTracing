@@ -105,7 +105,7 @@ CBVHNode::~CBVHNode()
 	delete m_right;
 }
 
-bool CBVHNode::Hit( CRay const & ray, float const tMin, float const tMax, SHitInfo & outInfo ) const
+bool CBVHNode::Hit( CRay const& ray, float const tMin, float const tMax, SHitInfo& outInfo ) const
 {
 	if ( m_box.Hit( ray, tMin, tMax ) )
 	{
@@ -142,7 +142,7 @@ bool CBVHNode::Hit( CRay const & ray, float const tMin, float const tMax, SHitIn
 	return false;
 }
 
-bool CBVHNode::BoundingBox( float const t0, float const t1, CAABB & box ) const
+bool CBVHNode::BoundingBox( float const t0, float const t1, CAABB& box ) const
 {
 	box = m_box;
 	return true;

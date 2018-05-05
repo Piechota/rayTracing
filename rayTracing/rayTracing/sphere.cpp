@@ -3,7 +3,7 @@
 #include "hitTable.h"
 #include "sphere.h"
 
-bool CSphere::Hit( CRay const & ray, float const tMin, float const tMax, SHitInfo & outInfo ) const
+bool CSphere::Hit( CRay const& ray, float const tMin, float const tMax, SHitInfo& outInfo ) const
 {
 	Vec3 const sphereOrigin = ray.GetOrigin() - m_center;
 	float const a = Vec3::Dot( ray.GetDirection(), ray.GetDirection() );
@@ -19,6 +19,7 @@ bool CSphere::Hit( CRay const & ray, float const tMin, float const tMax, SHitInf
 			outInfo.m_material = m_material;
 			outInfo.m_position = ray.GetPoint( root );
 			outInfo.m_normal = ( outInfo.m_position - m_center ) / m_radius;
+			outInfo.m_uv = Math::GetSphereUV( outInfo.m_normal );
 			outInfo.m_t = root;
 			return true;
 		}
@@ -29,6 +30,7 @@ bool CSphere::Hit( CRay const & ray, float const tMin, float const tMax, SHitInf
 			outInfo.m_material = m_material;
 			outInfo.m_position = ray.GetPoint( root );
 			outInfo.m_normal = ( outInfo.m_position - m_center ) / m_radius;
+			outInfo.m_uv = Math::GetSphereUV( outInfo.m_normal );
 			outInfo.m_t = root;
 			return true;
 		}
@@ -37,7 +39,7 @@ bool CSphere::Hit( CRay const & ray, float const tMin, float const tMax, SHitInf
 	return false;
 }
 
-bool CSphere::BoundingBox( float const t0, float const t1, CAABB & box ) const
+bool CSphere::BoundingBox( float const t0, float const t1, CAABB& box ) const
 {
 	box.Set( m_center - Vec3( m_radius, m_radius, m_radius ), m_center + Vec3( m_radius, m_radius, m_radius ) );
 	return true;

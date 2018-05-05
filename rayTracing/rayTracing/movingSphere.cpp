@@ -3,7 +3,7 @@
 #include "hitTable.h"
 #include "movingSphere.h"
 
-bool CMovingSphere::Hit( CRay const & ray, float const tMin, float const tMax, SHitInfo & outInfo ) const
+bool CMovingSphere::Hit( CRay const& ray, float const tMin, float const tMax, SHitInfo& outInfo ) const
 {
 	Vec3 const center = GetCenter( ray.GetTime() );
 	Vec3 const sphereOrigin = ray.GetOrigin() - center;
@@ -20,6 +20,7 @@ bool CMovingSphere::Hit( CRay const & ray, float const tMin, float const tMax, S
 			outInfo.m_material = m_material;
 			outInfo.m_position = ray.GetPoint( root );
 			outInfo.m_normal = ( outInfo.m_position - center ) / m_radius;
+			outInfo.m_uv = Math::GetSphereUV( outInfo.m_normal );
 			outInfo.m_t = root;
 			return true;
 		}
@@ -30,6 +31,7 @@ bool CMovingSphere::Hit( CRay const & ray, float const tMin, float const tMax, S
 			outInfo.m_material = m_material;
 			outInfo.m_position = ray.GetPoint( root );
 			outInfo.m_normal = ( outInfo.m_position - center ) / m_radius;
+			outInfo.m_uv = Math::GetSphereUV( outInfo.m_normal );
 			outInfo.m_t = root;
 			return true;
 		}
@@ -38,7 +40,7 @@ bool CMovingSphere::Hit( CRay const & ray, float const tMin, float const tMax, S
 	return false;
 }
 
-bool CMovingSphere::BoundingBox( float const t0, float const t1, CAABB & box ) const
+bool CMovingSphere::BoundingBox( float const t0, float const t1, CAABB& box ) const
 {
 	Vec3 const center0 = GetCenter( t0 );
 	Vec3 const center1 = GetCenter( t1 );

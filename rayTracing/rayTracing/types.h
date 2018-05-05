@@ -25,8 +25,12 @@ struct SPixel
 		return { r | g | b | a };
 	}
 
-	static SPixel ToPixel( Vec3 const color )
+	static SPixel ToPixel( Vec3 color )
 	{
+		color.x = 1.f < color.x ? 1.f : color.x;
+		color.y = 1.f < color.y ? 1.f : color.y;
+		color.z = 1.f < color.z ? 1.f : color.z;
+
 		uint32_t const r = uint32_t( color.x * 255.f ) << 16;
 		uint32_t const g = uint32_t( color.y * 255.f ) << 8;
 		uint32_t const b = uint32_t( color.z * 255.f );

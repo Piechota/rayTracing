@@ -1,11 +1,6 @@
 #include "headers.h"
 
-void CHitTableList::AddHitTable( IHitTable* const hitTable )
-{
-	m_list.Add( hitTable );
-}
-
-void CHitTableList::Clear()
+CHitTableList::~CHitTableList()
 {
 	unsigned int const listSize = m_list.Size();
 	for ( unsigned int i = 0; i < listSize; ++i )
@@ -14,7 +9,12 @@ void CHitTableList::Clear()
 	}
 }
 
-bool CHitTableList::Hit( CRay const & ray, float const tMin, float const tMax, SHitInfo& outInfo ) const
+void CHitTableList::AddHitTable( IHitTable* const hitTable )
+{
+	m_list.Add( hitTable );
+}
+
+bool CHitTableList::Hit( CRay const& ray, float const tMin, float const tMax, SHitInfo& outInfo ) const
 {
 	SHitInfo tmpHitInfo;
 	bool hitAnything = false;
@@ -34,7 +34,7 @@ bool CHitTableList::Hit( CRay const & ray, float const tMin, float const tMax, S
 	return hitAnything;
 }
 
-bool CHitTableList::BoundingBox( float const t0, float const t1, CAABB & box ) const
+bool CHitTableList::BoundingBox( float const t0, float const t1, CAABB& box ) const
 {
 	unsigned int const listSize = m_list.Size();
 	if ( listSize == 0 )

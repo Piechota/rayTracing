@@ -7,12 +7,10 @@ Vec3 Math::RandomInUnitSphere()
 
 	do
 	{
-		p.x = float( rand() ) / float( RAND_MAX );
-		p.y = float( rand() ) / float( RAND_MAX );
-		p.z = float( rand() ) / float( RAND_MAX );
+		p.x = float( rand() ) / float( RAND_MAX ) * 2.f - 1.f;
+		p.y = float( rand() ) / float( RAND_MAX ) * 2.f - 1.f;
+		p.z = float( rand() ) / float( RAND_MAX ) * 2.f - 1.f;
 	} while ( 1.f <= p.MagnitudeSq() );
-
-	p = p * 2.f - 1.f;
 
 	return p;
 }
@@ -23,11 +21,9 @@ Vec3 Math::RandomInUnitDisk()
 	p.z = 0.f;
 	do
 	{
-		p.x = float( rand() ) / float( RAND_MAX );
-		p.y = float( rand() ) / float( RAND_MAX );
+		p.x = float( rand() ) / float( RAND_MAX ) * 2.f - 1.f;
+		p.y = float( rand() ) / float( RAND_MAX ) * 2.f - 1.f;
 	} while ( 1.f <= p.MagnitudeSq() );
-
-	p = p * 2.f - 1.f;
 
 	return p;
 }
@@ -37,7 +33,7 @@ Vec3 Math::Reflect( Vec3 const v, Vec3 const n )
 	return v - n * 2.f * Vec3::Dot( v, n );
 }
 
-bool Math::Refract( Vec3 const v, Vec3 const n, float niOverNt, Vec3 & outRefracted )
+bool Math::Refract( Vec3 const v, Vec3 const n, float niOverNt, Vec3& outRefracted )
 {
 	Vec3 const uv = v.GetNormalized();
 	float const dt = Vec3::Dot( uv, n );
@@ -61,4 +57,13 @@ float Math::Schlick( float const cosine, float const refIdx )
 float Math::Rand()
 {
 	return float( rand() ) / float( RAND_MAX );
+}
+
+Vec2 Math::GetSphereUV( Vec3 const p )
+{
+
+	float const phi = atan2f( p.y, p.x );
+	float const theta = asinf( p.z );
+
+	return Vec2( 1.f - ( phi + MathConsts::PI ) / ( 2.f * MathConsts::PI ), ( theta + MathConsts::PI * 0.5f ) / MathConsts::PI );
 }

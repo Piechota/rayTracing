@@ -1,18 +1,21 @@
 #pragma once
+#include "perlin.h"
+#include "texture.h"
 
 class __declspec( novtable ) IMaterial
 {
 public:
 	virtual bool Scatter( CRay const& ray, SHitInfo const& hitInfo, Vec3& outAttenuation, CRay& outRayScattered ) const = 0;
+	virtual Vec3 Emitted( Vec3 const p, Vec2 const uv ) const { return Vec3(0.f, 0.f, 0.f); }
 };
 
 class CLambertianMat : public IMaterial
 {
 private:
-	Vec3 m_albedo;
+	ITexture* m_albedo;
 
 public:
-	CLambertianMat( Vec3 const albedo )
+	CLambertianMat( ITexture* const albedo )
 		: m_albedo( albedo )
 	{}
 
@@ -20,7 +23,7 @@ public:
 	{
 		Vec3 const target = hitInfo.m_position + hitInfo.m_normal + Math::RandomInUnitSphere();
 		outRayScattered = CRay( hitInfo.m_position, target - hitInfo.m_position, ray.GetTime() );
-		outAttenuation = m_albedo;
+		outAttenuation = m_albedo->GetValue( hitInfo.m_position, hitInfo.m_uv );
 		return true;
 	}
 };
@@ -99,6 +102,42 @@ public:
 			outRayScattered = CRay( hitInfo.m_position, refracted, ray.GetTime() );
 		}
 
+		return true;
+	}
+};
+
+class CDiffuseLightMat : public IMaterial
+{
+private:
+	ITexture* m_emit;
+
+public:
+	CDiffuseLightMat( ITexture* emit )
+		: m_emit( emit )
+	{}
+	virtual bool Scatter( CRay const& ray, SHitInfo const& hitInfo, Vec3& outAttenuation, CRay& outRayScattered ) const override
+	{
+		return false;
+	}
+	virtual Vec3 Emitted( Vec3 const p, Vec2 const uv ) const override
+	{
+		return m_emit->GetValue( p, uv );
+	}
+};
+
+class CIsotropicMat : public IMaterial
+{
+private:
+	ITexture* m_albedo;
+
+public:
+	CIsotropicMat( ITexture* const albedo )
+		: m_albedo( albedo )
+	{}
+	virtual bool Scatter( CRay const& ray, SHitInfo const& hitInfo, Vec3& outAttenuation, CRay& outRayScattered ) const override
+	{
+		outRayScattered = CRay( hitInfo.m_position, Math::RandomInUnitSphere() );
+		outAttenuation = m_albedo->GetValue( hitInfo.m_position, hitInfo.m_uv );
 		return true;
 	}
 };

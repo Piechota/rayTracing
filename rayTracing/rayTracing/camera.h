@@ -17,7 +17,31 @@ private:
 	float m_lensRadius;
 
 public:
+	CCamera() {}
 	CCamera( Vec3 const lookFrom, Vec3 const lookAt, Vec3 const up, unsigned int const width, unsigned int const height, float const vfov, float const aperture, float const focusDistance, float const time0, float const time1 )
+	{
+		float const aspect = float( width ) / float( height );
+
+		m_time0 = time0;
+		m_time1 = time1;
+
+		m_lensRadius = aperture * 0.5f;
+
+		float const theta = vfov * MathConsts::DegToRad;
+		float const halfHeight = focusDistance * tanf( theta * 0.5f );
+		float const halfWidth = aspect * halfHeight;
+
+		m_origin = lookFrom;
+		m_w = ( lookFrom - lookAt ).GetNormalized();
+		m_u = Vec3::Cross( up, m_w ).GetNormalized();
+		m_v = Vec3::Cross( m_w, m_u );
+
+		m_bottomLeftCorner = m_origin - m_u * halfWidth - m_v * halfHeight - m_w * focusDistance;
+		m_horizontal = m_u * 2.f * halfWidth;
+		m_vertical = m_v * 2.f * halfHeight;
+	}
+
+	void Set(Vec3 const lookFrom, Vec3 const lookAt, Vec3 const up, unsigned int const width, unsigned int const height, float const vfov, float const aperture, float const focusDistance, float const time0, float const time1 )
 	{
 		float const aspect = float( width ) / float( height );
 

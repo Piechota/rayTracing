@@ -112,31 +112,38 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="bvhNode.cpp" />
-    <ClCompile Include="hitTable.cpp" />
     <ClCompile Include="hitTableList.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math.cpp" />
     <ClCompile Include="movingSphere.cpp" />
+    <ClCompile Include="rect.cpp" />
     <ClCompile Include="render.cpp" />
     <ClCompile Include="sphere.cpp" />
+    <ClCompile Include="volumetric.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aabb.h" />
     <ClInclude Include="array.h" />
+    <ClInclude Include="box.h" />
     <ClInclude Include="bvhNode.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="headers.h" />
+    <ClInclude Include="helpHitTables.h" />
     <ClInclude Include="hitTable.h" />
     <ClInclude Include="hitTableList.h" />
     <ClInclude Include="input.h" />
     <ClInclude Include="material.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="movingSphere.h" />
+    <ClInclude Include="perlin.h" />
     <ClInclude Include="ray.h" />
+    <ClInclude Include="rect.h" />
     <ClInclude Include="render.h" />
     <ClInclude Include="sphere.h" />
+    <ClInclude Include="texture.h" />
     <ClInclude Include="timer.h" />
     <ClInclude Include="types.h" />
+    <ClInclude Include="volumetric.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
