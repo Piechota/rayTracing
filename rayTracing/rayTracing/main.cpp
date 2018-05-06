@@ -3,7 +3,6 @@
 
 #include "headers.h"
 
-#define USE_BVH
 #define MULTI_THREAD
 //#define DUMMY_PROFILER
 #ifdef DUMMY_PROFILER
@@ -22,124 +21,6 @@ Vec3* GTexture = nullptr;
 TArray< IHitTable* > GCreatedHitTables;
 TArray< IMaterial* > GCreatedMaterials;
 TArray< ITexture* > GCreatedTextures;
-
-void GetRandomScene( TArray< IHitTable* >& objects )
-{
-	ITexture* constatTexB = new CConstantTexture( Vec3( 0.2f, 0.3f, 0.1f ) );
-	ITexture* constatTexW = new CConstantTexture( Vec3( 0.9f, 0.9f, 0.9f ) );
-	ITexture* checker = new CCheckerTexture( constatTexB, constatTexW );
-
-	GCreatedTextures.Add( constatTexB );
-	GCreatedTextures.Add( constatTexW );
-	GCreatedTextures.Add( checker );
-
-	IMaterial* lambertChecker = new CLambertianMat( checker );
-	IHitTable* sphereA = new CSphere( Vec3( 0.f, -1000.f, 0.f ), 1000.f, lambertChecker );
-
-	GCreatedMaterials.Add( lambertChecker );
-	GCreatedHitTables.Add( sphereA );
-
-	objects.Add( sphereA );
-	for ( int a = -10; a < 10; ++a )
-	{
-		for ( int b = -10; b < 10; ++b )
-		{
-			float const matRand = Math::Rand();
-			Vec3 const center( a + 0.9f * Math::Rand(), 0.2f, b + 0.9f * Math::Rand() );
-			if ( 0.9f < ( center - Vec3( 4.f, 0.2f, 0.f ) ).Magnitude() )
-			{
-				if ( matRand < 0.8f )
-				{
-					ITexture* texture = new CConstantTexture( Vec3( Math::Rand()*Math::Rand(), Math::Rand()*Math::Rand(), Math::Rand()*Math::Rand() ) );
-					IMaterial* material = new CLambertianMat( texture );
-					IHitTable* sphere = new CMovingSphere( center, center + Vec3( 0.f, 0.5f * Math::Rand(), 0.f ), 0.f, 1.f, 0.2f, material );
-
-					GCreatedTextures.Add( texture );
-					GCreatedMaterials.Add( material );
-					GCreatedHitTables.Add( sphere );
-
-					objects.Add( sphere );
-				}
-				else if ( matRand < 0.95f )
-				{
-					IMaterial* material = new CMetalMat( Vec3( 0.5f * ( 1.f + Math::Rand() ), 0.5f * ( 1.f + Math::Rand() ), 0.5f * ( 1.f + Math::Rand() ) ), 0.5f * Math::Rand() );
-					IHitTable* sphere = new CSphere( center, 0.2f, material);
-
-					GCreatedMaterials.Add( material );
-					GCreatedHitTables.Add( sphere );
-
-					objects.Add( sphere );
-				}
-				else
-				{
-					IMaterial* material = new CDielectricMat( 1.5f );
-					IHitTable* sphere = new CSphere( center, 0.2f, material);
-
-					GCreatedMaterials.Add( material );
-					GCreatedHitTables.Add( sphere );
-
-					objects.Add( sphere );
-				}
-			}
-		}
-	}
-
-	{
-		IMaterial* material = new CDielectricMat( 1.5f );
-		IHitTable* sphere = new CSphere( Vec3( 0.f, 1.f, 0.f ), 1.f, material);
-
-		GCreatedMaterials.Add( material );
-		GCreatedHitTables.Add( sphere );
-
-		objects.Add( sphere );
-	}
-
-	{
-		ITexture* texture = new CConstantTexture( Vec3( 0.4f, 0.2f, 0.1f ) );
-		IMaterial* material = new CLambertianMat( texture );
-		IHitTable* sphere = new CSphere( Vec3( -4.f, 1.f, 0.f ), 1.f, material);
-
-		GCreatedTextures.Add( texture );
-		GCreatedMaterials.Add( material );
-		GCreatedHitTables.Add( sphere );
-
-		objects.Add( sphere );
-	}
-
-	{
-		IMaterial* material = new CMetalMat( Vec3( 0.7f, 0.6f, 0.5f), 0.f );
-		IHitTable* sphere = new CSphere( Vec3( 4.f, 1.f, 0.f ), 1.f, material);
-
-		GCreatedMaterials.Add( material );
-		GCreatedHitTables.Add( sphere );
-
-		objects.Add( sphere );
-	}
-}
-
-void GetSimpleScene( TArray< IHitTable* >& objects )
-{
-	ITexture* image = new CImageTexture( GTexture, 256, 256 );
-	ITexture* perlin = new CNoiseTexture( 5.f );
-	ITexture* white = new CConstantTexture( Vec3( 15.f, 15.f, 15.f ) );
-	IMaterial* material0 = new CLambertianMat( perlin );
-	//IMaterial* material1 = new CLambertianMat( image );
-	IMaterial* material1 = new CDiffuseLightMat( white );
-
-	IHitTable* sphere0 = new CSphere( Vec3( 0.f, -1000.f, 0.f ), 1000.f, material0 );
-	IHitTable* sphere1 = new CSphere( Vec3( 0.f, 2.f, 0.f ), 2.f, material1 );
-
-	GCreatedTextures.Add( image );
-	GCreatedTextures.Add( perlin );
-	GCreatedTextures.Add( white );
-	GCreatedMaterials.Add( material0 );
-	GCreatedMaterials.Add( material1 );
-	GCreatedHitTables.Add( sphere0 );
-	GCreatedHitTables.Add( sphere1 );
-
-	objects.Add( sphere0 );
-	objects.Add( sphere1 );
-}
 
 void GetCornellBox( TArray< IHitTable* >& objects, CCamera& camera, unsigned int const winWidth, unsigned int const winHeight )
 {
@@ -367,40 +248,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 
 	CCamera camera;
 
-#ifdef USE_BVH
 	CBVHNode* sceneBVH = nullptr;
 	{
 		TArray< IHitTable* > objects;
-		//GetRandomScene( objects );
-		//GetSimpleScene( objects );
 		GetCornellBoxSmoke( objects, camera, winWidth, winHeight );
 		sceneBVH = new CBVHNode( objects.Data(), int( objects.Size() ), 0.f, 1.f );
 	}
-#else 
-	CHitTableList hitTableList;
-	GetRandomScene( hitTableList.GetList() );
-#endif
-
-	/*Vec3 const lookFrom( 13.f, 2.f, 3.f );
-	Vec3 const lookAt( 0.f, 0.f, 0.f );
-	float const distanceToFocus = 10.f;
-	float const aperture = 0.f;
-
-	CCamera camera( lookFrom, lookAt, Vec3(0.f, 1.f, 0.f), winWidth, winHeight, 45.f, aperture, distanceToFocus, 0.f, 1.f );*/
-	
 
 #ifdef MULTI_THREAD
-#	ifdef USE_BVH
 	GRender.DrawMT( camera, sceneBVH );
-#	else
-	GRender.DrawMT( camera, &hitTableList );
-#	endif
 #else
-#	ifdef USE_BVH
 	GRender.Draw( camera, sceneBVH );
-#	else
-	GRender.Draw( camera, &hitTableList );
-#	endif
 #endif
 
 	SetWindowText( hwnd, "RayTracing (finished)" );
@@ -443,11 +301,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	OutputDebugStringA( log );
 #endif
 
-#ifdef USE_BVH
 	delete sceneBVH;
-#else
-	hitTableList.Clear();
-#endif
 
 	{
 		unsigned int const num = GCreatedHitTables.Size();

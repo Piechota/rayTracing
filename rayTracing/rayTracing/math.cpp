@@ -1,5 +1,18 @@
-#include <stdlib.h>     
+#include <stdlib.h>    
 #include "math.h"
+
+
+CRandomNumber::CRandomNumber()
+	: m_engine( m_device() )
+	, m_ditribution( 0., 1. )
+{}
+
+float CRandomNumber::Random()
+{
+	return float( m_ditribution( m_engine ) );
+}
+
+CRandomNumber GRandomNumber;
 
 Vec3 Math::RandomInUnitSphere()
 {
@@ -7,9 +20,9 @@ Vec3 Math::RandomInUnitSphere()
 
 	do
 	{
-		p.x = float( rand() ) / float( RAND_MAX ) * 2.f - 1.f;
-		p.y = float( rand() ) / float( RAND_MAX ) * 2.f - 1.f;
-		p.z = float( rand() ) / float( RAND_MAX ) * 2.f - 1.f;
+		p.x = GRandomNumber.Random() * 2.f - 1.f;
+		p.y = GRandomNumber.Random() * 2.f - 1.f;
+		p.z = GRandomNumber.Random() * 2.f - 1.f;
 	} while ( 1.f <= p.MagnitudeSq() );
 
 	return p;
@@ -21,8 +34,8 @@ Vec3 Math::RandomInUnitDisk()
 	p.z = 0.f;
 	do
 	{
-		p.x = float( rand() ) / float( RAND_MAX ) * 2.f - 1.f;
-		p.y = float( rand() ) / float( RAND_MAX ) * 2.f - 1.f;
+		p.x = GRandomNumber.Random() * 2.f - 1.f;
+		p.y = GRandomNumber.Random() * 2.f - 1.f;
 	} while ( 1.f <= p.MagnitudeSq() );
 
 	return p;
@@ -56,7 +69,7 @@ float Math::Schlick( float const cosine, float const refIdx )
 
 float Math::Rand()
 {
-	return float( rand() ) / float( RAND_MAX );
+	return GRandomNumber.Random();
 }
 
 Vec2 Math::GetSphereUV( Vec3 const p )

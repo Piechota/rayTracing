@@ -93,8 +93,8 @@ public:
 				for ( float k = 0; k < 2.f; ++k )
 				{
 					float const x = i * m_box.GetMax().x + ( 1.f - i ) * m_box.GetMin().x;
-					float const y = i * m_box.GetMax().y + ( 1.f - i ) * m_box.GetMin().y;
-					float const z = i * m_box.GetMax().z + ( 1.f - i ) * m_box.GetMin().z;
+					float const y = j * m_box.GetMax().y + ( 1.f - j ) * m_box.GetMin().y;
+					float const z = k * m_box.GetMax().z + ( 1.f - k ) * m_box.GetMin().z;
 					float const newX = m_cosTheta * x + m_sinTheta * z;
 					float const newZ = -m_sinTheta * x + m_cosTheta * z;
 					Vec3 const tester( newX, y, newZ );

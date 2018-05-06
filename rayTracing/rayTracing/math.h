@@ -1,6 +1,7 @@
 #pragma once
 #include <math.h>
 #include <float.h>
+#include <random>
 
 namespace MathConsts
 {
@@ -503,6 +504,18 @@ struct Quaternion
 		float const sinA = sinf(halfAngle);
 		return Quaternion(axis[0] * sinA, axis[1] * sinA, axis[2] * sinA, cosf(halfAngle));
 	}
+};
+
+class CRandomNumber
+{
+private:
+	std::random_device m_device;
+	std::mt19937 m_engine;
+	std::uniform_real_distribution<> m_ditribution;
+
+public:
+	CRandomNumber();
+	float Random();
 };
 
 namespace Math
