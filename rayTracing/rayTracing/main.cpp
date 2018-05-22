@@ -4,7 +4,7 @@
 #include "headers.h"
 
 #define MULTI_THREAD
-//#define DUMMY_PROFILER
+#define DUMMY_PROFILER
 #ifdef DUMMY_PROFILER
 #include <stdio.h>
 long constexpr GFrameProfNum = 2000;
@@ -248,6 +248,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 
 	CCamera camera;
 
+#ifdef DUMMY_PROFILER
+	GTimer.Tick();
+	int64_t prof = GTimer.TimeFromStart();
+#endif
+
 	CBVHNode* sceneBVH = nullptr;
 	{
 		TArray< IHitTable* > objects;
@@ -259,6 +264,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 	GRender.DrawMT( camera, sceneBVH );
 #else
 	GRender.Draw( camera, sceneBVH );
+#endif
+
+#ifdef DUMMY_PROFILER
+	prof = GTimer.TimeFromStart() - prof;
+	char log[ 1024 ];
+	sprintf_s( log, ARRAYSIZE(log), "total time: %lli\nseconds: %f", prof, GTimer.GetSeconds( prof ) );
+	OutputDebugStringA( log );
 #endif
 
 	SetWindowText( hwnd, "RayTracing (finished)" );
@@ -278,28 +290,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pCmdLine, 
 				break;
 			}
 		}
-		GTimer.Tick();
-#ifdef DUMMY_PROFILER
-		GFramesProf[ GFrameProfID % GFrameProfNum] = GTimer.LastDelta();
-		++GFrameProfID;
-#endif
 	}
-
-#ifdef DUMMY_PROFILER
-	int const start = max( 0, GFrameProfID - GFrameProfNum );
-	int64_t iMin = INT64_MAX, iMax = 0, iSum = 0;
-	for ( int i = start; i < GFrameProfID; ++i )
-	{
-		INT64 const time = GFramesProf[ i % GFrameProfNum ];
-		iMin = min( time, iMin );
-		iMax = max( time, iMax );
-		iSum += time;
-	}
-
-	char log[ 1024 ];
-	sprintf_s( log, ARRAYSIZE(log), "frame num: %li\nmin\tmax\tavg\n%lli\t%lli\t%lli\n%fs\t%fs\t%fs\n", GFrameProfID - start, iMin, iMax, iSum / ( GFrameProfID - start ), GTimer.GetSeconds( iMin ), GTimer.GetSeconds( iMax ), GTimer.GetSeconds( iSum / ( GFrameProfID - start ) ) );
-	OutputDebugStringA( log );
-#endif
 
 	delete sceneBVH;
 

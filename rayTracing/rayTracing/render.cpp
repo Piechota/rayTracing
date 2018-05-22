@@ -1,5 +1,8 @@
 #include <thread>
+#include <atomic>
 #include "headers.h"
+
+
 
 void CRender::Init(unsigned int winWidth, unsigned int winHeight)
 {
@@ -43,70 +46,112 @@ Vec3 Color( CRay const& ray, IHitTable const* const pScene, unsigned int depth )
 	}
 }
 
-struct SThreadContext
+struct SDrawThreadContext
 {
 	CCamera const* const m_pCamera;
 	IHitTable const* const m_pScene;
 	unsigned int const m_winWidth;
 	unsigned int const m_winHeight;
-	SPixel* const m_pBackbuffer;
+	unsigned int const m_sampleNum;
+	float* const m_pBackbuffer;
 };
 
-void DrawThread( SThreadContext const& context, unsigned int startPixel, unsigned int const endPixel )
+unsigned int constexpr SampleNum = 100;
+std::atomic_uint SampleID( 0 );
+void DrawThread( SDrawThreadContext const& context )
 {
-	Vec3 const origin = Vec3( 0.f, 0.f, 0.f );
-
+	unsigned int sampleID = SampleID.fetch_add( 1 );
 	float const invWidth = 1.f / float( context.m_winWidth );
 	float const invHeight = 1.f / float( context.m_winHeight );
 
-	for ( ; startPixel < endPixel; ++startPixel )
+	while ( sampleID < context.m_sampleNum )
 	{
-		unsigned int const x = startPixel % context.m_winWidth;
-		unsigned int const y = startPixel / context.m_winWidth;
-
 		Vec3 color( 0.f, 0.f, 0.f );
 
-		unsigned int const samplesNum = 500;
-		for ( unsigned int s = 0; s < samplesNum; ++s )
+		float const offsetU = Math::Rand() * 0.9999f;
+		float const offsetV = Math::Rand() * 0.9999f;
+
+		unsigned int const pixelID = sampleID / SampleNum;
+		float const x = float(pixelID % context.m_winWidth);
+		float const y = float(pixelID / context.m_winWidth);
+		float const u = ( x + offsetU ) * invWidth;
+		float const v = ( y + offsetV ) * invHeight;
+
+		CRay const ray = context.m_pCamera->GetRay( u, v );
+		color += Color( ray, context.m_pScene, 0 );
+
+		context.m_pBackbuffer[ ( sampleID * 3 ) + 0 ] = color.x;
+		context.m_pBackbuffer[ ( sampleID * 3 ) + 1 ] = color.y;
+		context.m_pBackbuffer[ ( sampleID * 3 ) + 2 ] = color.z;
+
+		sampleID = SampleID.fetch_add( 1 );
+	}
+}
+
+struct SCombineThreadContext
+{
+	SPixel* const m_pBackbuffer;
+	float const* const m_pSrcBackbuffer;
+};
+void CombineThread( SCombineThreadContext const& context, unsigned int const start, unsigned int const end )
+{
+	float const invSampleNum = 1.f / float( SampleNum );
+	for ( unsigned int i = start; i < end; ++i )
+	{
+		float r = 0.f;
+		float g = 0.f;
+		float b = 0.f;
+
+		unsigned int const pixelOffset = i * SampleNum;
+		for ( unsigned int s = 0; s < SampleNum; ++s )
 		{
-			float const offsetU = Math::Rand() * 0.9999f;
-			float const offsetV = Math::Rand() * 0.9999f;
-
-			float const u = ( float( x ) + offsetU ) * invWidth;
-			float const v = ( float( y ) + offsetV ) * invHeight;
-			CRay const ray = context.m_pCamera->GetRay( u, v );
-			color += Color( ray, context.m_pScene, 0 );
+			r += context.m_pSrcBackbuffer[ 3 * ( pixelOffset + s ) + 0 ];
+			g += context.m_pSrcBackbuffer[ 3 * ( pixelOffset + s ) + 1 ];
+			b += context.m_pSrcBackbuffer[ 3 * ( pixelOffset + s ) + 2 ];
 		}
+		r *= invSampleNum;
+		g *= invSampleNum;
+		b *= invSampleNum;
 
-		color *= ( 1.f / float(samplesNum) );
-		color.x = sqrtf( color.x );
-		color.y = sqrtf( color.y );
-		color.z = sqrtf( color.z );
+		r = sqrtf( r );
+		g = sqrtf( g );
+		b = sqrtf( b );
 
-		context.m_pBackbuffer[ y * context.m_winWidth + x ] = SPixel::ToPixel( color );
+		context.m_pBackbuffer[ i ] = SPixel::ToPixel( Vec3( r, g, b ) );
 	}
 }
 
 void CRender::DrawMT( CCamera const& camera, IHitTable const* const pScene )
 {
-	SThreadContext const threadContext = { &camera, pScene, m_winWidth, m_winHeight, m_backbuffer };
+	float* fBackbuffer = new float[ m_winWidth * m_winHeight * SampleNum * 3 ];
+	SDrawThreadContext const drawThreadContext = { &camera, pScene, m_winWidth, m_winHeight, m_winWidth * m_winHeight * SampleNum, fBackbuffer };
+	SCombineThreadContext const combineThreadContext = { m_backbuffer, fBackbuffer };
 
 	unsigned int const threadNum = std::thread::hardware_concurrency();
 	unsigned int const createdThreadNum = threadNum - 1;
 	std::thread* threads = new std::thread[ createdThreadNum ];
 
+	for ( unsigned int i = 0; i < createdThreadNum; ++i )
+	{
+		threads[ i ] = std::thread( DrawThread, std::ref( drawThreadContext ) );
+	}
+	DrawThread( drawThreadContext );
+
+	for ( unsigned int i = 0; i < createdThreadNum; ++i )
+	{
+		threads[ i ].join();
+	}
+
 	unsigned int const allPixelsNum = m_winHeight * m_winWidth;
 	unsigned int const pixelsNumPerThread = allPixelsNum / threadNum;
-
 	unsigned int const firstThreadPixelsNum = pixelsNumPerThread + ( allPixelsNum % pixelsNumPerThread );
 	unsigned int threadID = 0;
 	for ( unsigned int i = firstThreadPixelsNum; i < allPixelsNum; i += pixelsNumPerThread )
 	{
-		threads[ threadID ] = std::thread( DrawThread, std::ref( threadContext ), i, i + pixelsNumPerThread );
+		threads[ threadID ] = std::thread( CombineThread, std::ref( combineThreadContext ), i, i + pixelsNumPerThread );
 		++threadID;
 	}
-
-	DrawThread( std::ref( threadContext ), 0, firstThreadPixelsNum );
+	CombineThread( combineThreadContext, 0, firstThreadPixelsNum );
 
 	for ( unsigned int i = 0; i < createdThreadNum; ++i )
 	{
@@ -114,6 +159,7 @@ void CRender::DrawMT( CCamera const& camera, IHitTable const* const pScene )
 	}
 
 	delete[] threads;
+	delete[] fBackbuffer;
 
 	Present();
 }

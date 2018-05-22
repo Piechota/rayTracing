@@ -52,3 +52,7 @@ rayTracing/rayTracing/x64/Release/
 *.iobj
 
 *.ipdb
+
+rayTracing/x64/Debug/rayTracing\.pdb
+
+rayTracing/x64/Release/rayTracing\.pdb
