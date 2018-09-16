@@ -1,4 +1,6 @@
 #pragma once
+#define USE_BLUE_NOISE 1
+
 #include <math.h>
 #include <float.h>
 #include <random>
@@ -520,6 +522,8 @@ public:
 
 namespace Math
 {
+	int WangHash(int index);
+	Vec2 BlueNoise2D(int const index);
 	Vec3 RandomInUnitSphere();
 	Vec3 RandomInUnitDisk();
 	Vec3 Reflect( Vec3 const v, Vec3 const n );

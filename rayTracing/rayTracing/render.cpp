@@ -68,8 +68,15 @@ void DrawThread( SDrawThreadContext const& context )
 	{
 		Vec3 color( 0.f, 0.f, 0.f );
 
-		float const offsetU = Math::Rand() * 0.9999f;
-		float const offsetV = Math::Rand() * 0.9999f;
+		#if USE_BLUE_NOISE
+			Vec2 const sample = Math::BlueNoise2D(Math::WangHash(sampleID));
+
+			float const offsetU = sample.x;
+			float const offsetV = sample.y;
+		#else
+			float const offsetU = Math::Rand() * 0.9999f;
+			float const offsetV = Math::Rand() * 0.9999f;
+		#endif
 
 		unsigned int const pixelID = sampleID / SampleNum;
 		float const x = float(pixelID % context.m_winWidth);
@@ -180,8 +187,15 @@ void CRender::Draw( CCamera const& camera, IHitTable const* const pScene )
 			unsigned int const samplesNum = 100;
 			for ( unsigned int s = 0; s < samplesNum; ++s )
 			{
-				float const offsetU = Math::Rand() * 0.9999f;
-				float const offsetV = Math::Rand() * 0.9999f;
+				#if USE_BLUE_NOISE
+					Vec2 const sample = Math::BlueNoise2D(Math::WangHash(s));
+
+					float const offsetU = sample.x;
+					float const offsetV = sample.y;
+				#else
+					float const offsetU = Math::Rand() * 0.9999f;
+					float const offsetV = Math::Rand() * 0.9999f;
+				#endif
 
 				float const u = ( float( x ) + offsetU ) * invWidth;
 				float const v = ( float( y ) + offsetV ) * invHeight;
